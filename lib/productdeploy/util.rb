@@ -50,7 +50,7 @@ module ProductDeploy
         
         def self.query_patches_from_table(db_to_use,raveversion = '5.6.3.86')
              sql_query = "SELECT distinct [PatchNumber] FROM [#{db_to_use}].[dbo].[RavePatches] WHERE RaveVersion = \'#{raveversion}\'"
-             cmd_to_run = "#{SQL_CMD} -b -d #{db_to_use} -Q \"#{sql_query}\""
+             cmd_to_run = "\"#{SQL_CMD}\" -b -d #{db_to_use} -Q \"#{sql_query}\""
              output = %x{#{cmd_to_run}}
              lines = output.split("\n")
              patches = []
@@ -62,7 +62,7 @@ module ProductDeploy
          def self.get_db_names_from_bak(db_file_name)
              raise("DB File #{db_file_name} doesn't exist") unless File.exists?(db_file_name)
              sql_query = "Restore filelistonly from disk = \'#{db_file_name}\'"
-             cmd_to_run = "#{SQL_CMD} -b -Q \"#{sql_query}\""
+             cmd_to_run = "\"#{SQL_CMD}\" -b -Q \"#{sql_query}\""
              output = %x{#{cmd_to_run}}
              cvs = output.gsub(/[ \t]+/,',').split("\n")
              raise("SQL output doesn't look right, #{output}") unless cvs.size > 5

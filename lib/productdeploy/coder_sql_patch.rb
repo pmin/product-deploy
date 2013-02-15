@@ -115,7 +115,7 @@ module ProductDeploy
                 log = "#{local_route}.log"
                 # using \" \" because local_route (filename) can contain spaces
                 # -b adds exit codes to sqlcmd.exe
-                cmd_to_run = "#{SQL_CMD} -I -b -d #{@db_name} -i \"#{local_route}\" -o \"#{log}\""
+                cmd_to_run = "\"#{SQL_CMD}\" -I -b -d #{@db_name} -i \"#{local_route}\" -o \"#{log}\""
                 # System captures the exit code of the the command, if 0 returns TRUE if non 0 
                 # returns FALSE
                 start_time = Time.now.strftime("%Y-%m-%d %H:%M:%S")
@@ -158,9 +158,9 @@ private
             log[:study_id] = 'NULL'
             log[:result_message].gsub!(/[\r\n'"]/,'-') # Remove characters that can't be pass throught the cmd line
             
-            sql_query = "spScriptExecutionLogInsert \'#{log[:app_version]}\', \'#{log[:script_name]}\', \'#{log[:script_run_by_db_login]}\', \'#{log[:applied_by]}\', \'#{log[:applied_from]}\', \'#{log[:start_time]}\', \'#{log[:end_time]}\', \'#{log[:result_message]}\', #{log[:sql_result_code]}, #{log[:segment_id]}, #{log[:segment_id]}"
+            sql_query = "spScriptExecutionLogInsert \'#{log[:app_version]}\', \'#{log[:script_name]}\', \'#{log[:script_run_by_db_login]}\', \'#{log[:applied_by]}\', \'#{log[:applied_from]}\', \'#{log[:start_time]}\', \'#{log[:end_time]}\', \'#{log[:result_message]}\', \'#{log[:sql_result_code]}\', #{log[:segment_id]}, #{log[:segment_id]}"
             #sql_cmd = "sqlcmd -S localhost -d #{@db_name}  -b -Q \ -o \"#{log_file}\""
-            sql_cmd = "#{SQL_CMD} -b -d #{@db_name} -E -Q \"#{sql_query}\" -o \"#{log_file}\""
+            sql_cmd = "\"#{SQL_CMD}\" -b -d #{@db_name} -E -Q \"#{sql_query}\" -o \"#{log_file}\""
             
             system(sql_cmd)
             raise("sql command failed #{$?.inspect},\n\t Output this error: #{File.read(log_file)},\n\t Command to run: #{sql_cmd}") if $? != 0
@@ -175,7 +175,7 @@ private
             log_file = 'c:\chef\log\sql_cmd_output.log'
             
             sql_query = "update [#{@db_name}].[dbo].[AppVersions] set [active] = 1 where [version] = \'#{build_number}\'"
-            sql_cmd = "#{SQL_CMD} -b -d #{@db_name} -Q \"#{sql_query}\" -o \"#{log_file}\""
+            sql_cmd = "\"#{SQL_CMD}\" -b -d #{@db_name} -Q \"#{sql_query}\" -o \"#{log_file}\""
             system(sql_cmd)
             raise("sql command failed #{$?.inspect},\n\t Output this error: #{File.read(log_file)},\n\t Command to run: #{sql_cmd}") if $? != 0
             return true
@@ -187,9 +187,9 @@ private
             #build_number='1.0.56'
             #@db_name='coder_v1_WhoDrugB2'
             sql_query = "SELECT [Version] FROM [#{@db_name}].[dbo].[AppVersions] WHERE [Active] = \'1\'"
-            cmd_to_run = "#{SQL_CMD} -b -d #{@db_name} -Q \"#{sql_query}\""
+            cmd_to_run = "\"#{SQL_CMD}\" -b -d #{@db_name} -Q \"#{sql_query}\""
             output = %x{#{cmd_to_run}}
-            return !output.grep(/^#{build_number}/).empty? #grep returns an array of matches
+            return !output.scan(/^#{build_number}/).empty? #grep returns an array of matches
 
         end
 
